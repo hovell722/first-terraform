@@ -1,9 +1,9 @@
-variable "vpc_id" {
-  default = "vpc-07e47e9d90d2076da"
-}
+# variable "vpc_id" {
+#   default = "vpc-07e47e9d90d2076da"
+# }
 
 variable "name" {
-  default = "eng54-James-app-tf"
+  default = "eng54-James-tf"
 }
 
 variable "ami_id" {
