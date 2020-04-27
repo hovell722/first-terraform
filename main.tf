@@ -37,3 +37,11 @@ module "app" {
   ami_id = var.ami_id
   gateway_id = aws_internet_gateway.igw.id
 }
+
+module "db" {
+  source = "./modules/db_tier"
+  vpc_id = aws_vpc.app_vpc.id
+  name = var.name
+  # ami_id = var.ami_id
+  # gateway_id = aws_internet_gateway.igw.id
+}

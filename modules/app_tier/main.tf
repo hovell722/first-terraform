@@ -7,7 +7,7 @@ resource "aws_subnet" "app_subnet" {
     cidr_block = "10.0.1.0/24"
     availability_zone = "eu-west-1a"
     tags = {
-      Name = var.name
+      Name = "${var.name}-public"
     }
 }
 
@@ -79,7 +79,7 @@ resource "aws_network_acl" "app_network_acl" {
   }
 
   tags = {
-    Name = "${var.name}-nacl"
+    Name = "${var.name}-nacl-public"
   }
 }
 
@@ -152,7 +152,7 @@ resource "aws_security_group" "app_sg" {
   }
 
   tags = {
-    Name = "${var.name}-tags"
+    Name = "${var.name}-tags-public"
   }
 }
 
