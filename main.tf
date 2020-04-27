@@ -92,6 +92,10 @@ resource "aws_security_group" "app_sg" {
   }
 }
 
+data "template_file" "app_init" {
+  template = file("./scripts/app/init.sh.tpl")
+}
+
 # Launching an instance
 resource "aws_instance" "app_instance" {
     ami = var.ami_id
@@ -104,17 +108,19 @@ resource "aws_instance" "app_instance" {
     }
     key_name = "james-eng54"
 
-  provisioner "remote-exec" {
-    inline = [
-      "cd /home/ubuntu/app",
-      "npm start"
-    ]
-  }
-  connection {
-    type     = "ssh"
-    user     = "ubuntu"
-    host = self.public_ip
-    private_key = "${file("~/.ssh/james-eng54.pem")}"
-  }
+    user_data = data.template_file.app_init.rendered
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "cd /home/ubuntu/app",
+  #     "npm start"
+  #   ]
+  # }
+  # connection {
+  #   type     = "ssh"
+  #   user     = "ubuntu"
+  #   host = self.public_ip
+  #   private_key = file("~/.ssh/james-eng54.pem")
+  # }
 
 }
