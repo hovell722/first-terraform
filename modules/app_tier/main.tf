@@ -168,7 +168,7 @@ resource "aws_instance" "app_instance" {
     subnet_id = aws_subnet.app_subnet.id
     vpc_security_group_ids = [aws_security_group.app_sg.id]
     tags = {
-        Name = var.name
+        Name = "${var.name}-public"
     }
     key_name = "james-eng54"
 

@@ -126,7 +126,7 @@ resource "aws_instance" "db_instance" {
     subnet_id = aws_subnet.db_subnet.id
     vpc_security_group_ids = [aws_security_group.db_sg.id]
     tags = {
-        Name = var.name
+        Name = "${var.name}-private"
     }
     key_name = "james-eng54"
     user_data = data.template_file.db_init.rendered
