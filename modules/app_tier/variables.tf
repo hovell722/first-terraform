@@ -13,3 +13,7 @@ variable "ami_id" {
 variable "gateway_id" {
   description = "gateway id for route table"
 }
+
+variable "db_ip" {
+
+}

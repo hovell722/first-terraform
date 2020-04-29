@@ -34,14 +34,15 @@ module "app" {
   source = "./modules/app_tier"
   vpc_id = aws_vpc.app_vpc.id
   name = var.name
-  ami_id = var.ami_id
+  ami_id = var.app_ami_id
   gateway_id = aws_internet_gateway.igw.id
+  db_ip = module.db.instance_ip_address
 }
 
 module "db" {
   source = "./modules/db_tier"
   vpc_id = aws_vpc.app_vpc.id
   name = var.name
-  # ami_id = var.ami_id
-  # gateway_id = aws_internet_gateway.igw.id
+  ami_id = var.db_ami_id
+  gateway_id = aws_internet_gateway.igw.id
 }

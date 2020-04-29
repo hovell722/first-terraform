@@ -1,6 +1,26 @@
 # App tier
 # move here anything to do with the app tier creation
 
+# Creating route table
+resource "aws_route_table" "public" {
+  vpc_id = var.vpc_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = var.gateway_id
+  }
+
+  tags = {
+    Name = "${var.name}-public"
+  }
+}
+
+# Creating route table associations
+resource "aws_route_table_association" "assoc" {
+  subnet_id = aws_subnet.app_subnet.id
+  route_table_id = aws_route_table.public.id
+}
+
 # Creating public subnet
 resource "aws_subnet" "app_subnet" {
     vpc_id = var.vpc_id
@@ -14,6 +34,16 @@ resource "aws_subnet" "app_subnet" {
 # Creating NACLs
 resource "aws_network_acl" "app_network_acl" {
   vpc_id = var.vpc_id
+  subnet_ids = [aws_subnet.app_subnet.id]
+
+  egress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
 
   ingress {
     protocol   = "tcp"
@@ -62,63 +92,22 @@ resource "aws_network_acl" "app_network_acl" {
 
   ingress {
     protocol   = "tcp"
-    rule_no    = 100
+    rule_no    = 150
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 80
-    to_port    = 80
+    cidr_block = "10.0.2.0/24"
+    from_port  = 27017
+    to_port    = 27017
   }
 
-  egress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
 
   tags = {
     Name = "${var.name}-nacl-public"
   }
 }
 
-# Creating route table
-resource "aws_route_table" "public" {
-  vpc_id = var.vpc_id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = var.gateway_id
-  }
-
-  tags = {
-    Name = "${var.name}-public"
-  }
-}
-
-# Creating route table associations
-resource "aws_route_table_association" "assoc" {
-  subnet_id = aws_subnet.app_subnet.id
-  route_table_id = aws_route_table.public.id
-}
-
-# Creating template script
-data "template_file" "app_init" {
-  template = file("./scripts/app/init.sh.tpl")
-# .tpl like .erb allows us to interpolate variables into static templates
-  # making them dynamic
-  vars = {
-    my_name = "${var.name} is the real name James"
-  }
-  # setting ports
-  # for the mongod db, seting private_ip for db_host
-  # AWS gives us new Ips - if we want to make one machine aware of another this could be useful
-}
-
 # Adding security groups
 resource "aws_security_group" "app_sg" {
-    name = "eng54-James-sg"
+    name = "eng54-James-sg-public"
     description = "security group that allows port 80 from anywhere"
     vpc_id      = var.vpc_id
 
@@ -129,6 +118,7 @@ resource "aws_security_group" "app_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   ingress {
     description = "Allows port 3000"
     from_port   = 3000
@@ -136,6 +126,7 @@ resource "aws_security_group" "app_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   ingress {
     description = "Allows port 22"
     from_port   = 22
@@ -154,6 +145,19 @@ resource "aws_security_group" "app_sg" {
   tags = {
     Name = "${var.name}-tags-public"
   }
+}
+
+# Creating template script
+data "template_file" "app_init" {
+  template = file("./scripts/app/init.sh.tpl")
+  # .tpl like .erb allows us to interpolate variables into static templates
+  # making them dynamic
+  vars = {
+   db_priv_ip = var.db_ip
+ }
+  # setting ports
+  # for the mongod db, seting private_ip for db_host
+  # AWS gives us new Ips - if we want to make one machine aware of another this could be useful
 }
 
 # Launching an instance
